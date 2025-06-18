@@ -21,7 +21,6 @@
   </style>
 </head>
 <body>
-  <h1>Welcome to DevOps</h1><h1>welcome to jenkins</h1>
-
+  <h1>Welcome to DevOps</h1>
 </body>
 </html>
