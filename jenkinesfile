@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    options {
+        skipDefaultCheckout(true) // We manually check out below
+    }
+
+    environment {
+        MAVEN_HOME = tool 'Maven 3'
+        PATH = "${MAVEN_HOME}/bin:${env.PATH}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo "Building branch: ${env.BRANCH_NAME}"
+            }
+        }
+
+        stage('Build') {
+            when {
+                not {
+                    branch 'main'
+                }
+            }
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'release/*'
+                }
+            }
+            steps {
+                sh 'mvn package'
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "Deploying app from ${env.BRANCH_NAME} branch..."
+                // Add deploy steps here
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Finished build for branch: ${env.BRANCH_NAME}"
+        }
+        failure {
+            echo "Build failed on branch: ${env.BRANCH_NAME}"
+        }
+    }
+}
